@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تدريبات الرياضيات الإثرائية - الصف الثامن</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Cairo & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+        /* Inline math container ensuring LTR reading inside RTL text */
+        .math-inline {
+            direction: ltr;
+            unicode-bidi: embed;
+            display: inline-block;
+            text-align: left;
+        }
+        /* Recurring decimal overline */
+        .recurring {
+            text-decoration-line: overline;
+            text-decoration-thickness: 2px;
+            text-decoration-skip-ink: none;
+            padding: 0 2px;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            line-height: 1.15;
+        }
+
+        .answer-summary {
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+            border: 1px solid #a7f3d0;
+            border-radius: 18px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .solution-steps {
+            display: grid;
+            gap: 8px;
+        }
+        .solution-step {
+            background: #fff;
+            border: 1px solid #e0e7ff;
+            border-radius: 14px;
+            padding: 9px 11px;
+        }
+        .solution-step strong { color: #4338ca; }
+        @keyframes softPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
+        .voice-active { animation: softPulse 1.2s ease-in-out infinite; }
+        /* Clear full radical formatting */
+        .radical {
+            direction: ltr;
+            unicode-bidi: embed;
+            display: inline-flex;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .radical-sign {
+            font-size: 1.15em;
+            line-height: 1;
+            margin-right: 1px;
+        }
+        .radical-content {
+            border-top: 1.5px solid currentColor;
+            padding-top: 1px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+        /* Fraction formatting */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            margin: 0 3px;
+            font-size: 0.9em;
+            line-height: 1.1;
+            direction: ltr;
+        }
+        .fraction .numerator {
+            border-bottom: 1.5px solid currentColor;
+            padding-bottom: 1px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+        .fraction .denominator {
+            padding-top: 1px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+        /* Option Card Styling */
+        .option-card {
+            direction: rtl;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s ease-in-out;
+        }
+        .option-content {
+            direction: ltr;
+            unicode-bidi: embed;
+            text-align: left;
+            flex-grow: 1;
+            padding-right: 12px;
+            font-size: 0.95rem;
+        }
+        .option-badge {
+            direction: ltr;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+    
+        /* ===== Modern 2026 visual refresh ===== */
+        :root { --brand-1:#0f766e; --brand-2:#2563eb; --brand-3:#7c3aed; --gold:#f59e0b; }
+        body { background: radial-gradient(circle at 15% 0%, rgba(37,99,235,.10), transparent 28%), radial-gradient(circle at 90% 15%, rgba(124,58,237,.10), transparent 30%), #f7fafc !important; }
+        header { background: linear-gradient(135deg,#0f172a 0%,#123c56 45%,#0f766e 100%) !important; border-bottom: 1px solid rgba(255,255,255,.14) !important; }
+        #view-units > div:first-child, #view-quiz > div:first-child, #view-results > div:first-child { backdrop-filter: blur(12px); }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) { border-color:#bfdbfe !important; box-shadow:0 18px 45px rgba(37,99,235,.12) !important; }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) { border-color:#bbf7d0 !important; box-shadow:0 18px 45px rgba(16,185,129,.12) !important; }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) button { background:linear-gradient(135deg,#eff6ff,#eef2ff) !important; border-color:#bfdbfe !important; color:#1e3a8a !important; }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) button { background:linear-gradient(135deg,#ecfdf5,#f0fdfa) !important; border-color:#a7f3d0 !important; color:#064e3b !important; }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) button span:last-child { background:#2563eb !important; }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) button span:last-child { background:#059669 !important; }
+        #view-quiz > div:first-child button { background:linear-gradient(135deg,#0f766e,#0ea5e9) !important; border-color:transparent !important; box-shadow:0 10px 25px rgba(14,165,233,.25) !important; }
+        #options-container button { min-height:64px; border-radius:20px !important; box-shadow:0 7px 18px rgba(15,23,42,.06) !important; }
+        #options-container button:hover { transform:translateY(-2px) scale(1.005); box-shadow:0 12px 25px rgba(37,99,235,.12) !important; }
+        #teacher-box { background:linear-gradient(135deg,#eff6ff,#f5f3ff) !important; border-color:#c4b5fd !important; box-shadow:0 14px 35px rgba(79,70,229,.12) !important; }
+        #teacher-box button { background:linear-gradient(135deg,#7c3aed,#2563eb) !important; }
+        .answer-summary { background:linear-gradient(135deg,#ecfdf5,#f0fdfa) !important; border-color:#86efac !important; }
+        .solution-step { border-color:#dbeafe !important; box-shadow:0 4px 12px rgba(15,23,42,.04); }
+        .voice-active { animation:voicePulse .85s ease-in-out infinite !important; }
+        @keyframes voicePulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(124,58,237,.28)} 50%{transform:scale(1.05);box-shadow:0 0 0 9px rgba(124,58,237,0)} }
+        .recurring { text-decoration-line:overline !important; text-decoration-thickness:2px !important; text-decoration-skip-ink:none !important; }
+        .option-card { position:relative; overflow:hidden; }
+        .option-card::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent); transform:translateX(-120%); transition:transform .5s; pointer-events:none; }
+        .option-card:hover::after { transform:translateX(120%); }
+        .student-feedback { animation:feedbackPop .35s ease-out; }
+        @keyframes feedbackPop { from{opacity:0;transform:translateY(8px) scale(.97)} to{opacity:1;transform:none} }
+
+        /* ===== Requested visual refinements — preserve existing layout/content ===== */
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) {
+            border-color: #34d399 !important;
+            box-shadow: 0 18px 45px rgba(16, 185, 129, .16) !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) {
+            border-color: #2dd4bf !important;
+            box-shadow: 0 18px 45px rgba(20, 184, 166, .16) !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) .bg-indigo-50,
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) .bg-indigo-50\/70 {
+            background-color: #ecfdf5 !important;
+            color: #065f46 !important;
+            border-color: #a7f3d0 !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(1) button span:last-child {
+            background: #059669 !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) .bg-violet-50,
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) .bg-violet-50\/70 {
+            background-color: #f0fdfa !important;
+            color: #115e59 !important;
+            border-color: #99f6e4 !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div:nth-child(2) button span:last-child {
+            background: #0d9488 !important;
+        }
+
+        /* Both unit-test buttons: one unified, eye-catching color, no text shadow. */
+        #view-units .grid.md\:grid-cols-2 > div > button[onclick^="startRandomQuiz"] {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 52%, #0f766e 100%) !important;
+            color: #ffffff !important;
+            border: 0 !important;
+            text-shadow: none !important;
+            -webkit-text-shadow: none !important;
+            box-shadow: 0 10px 24px rgba(5, 150, 105, .28) !important;
+        }
+        #view-units .grid.md\:grid-cols-2 > div > button[onclick^="startRandomQuiz"]:hover {
+            background: linear-gradient(135deg, #047857 0%, #0f766e 52%, #115e59 100%) !important;
+            text-shadow: none !important;
+            -webkit-text-shadow: none !important;
+            transform: translateY(-1px);
+        }
+
+        /* Home button in the quiz screen: clearer and more prominent. */
+        #view-quiz button[onclick="returnToUnits()"] {
+            background: linear-gradient(135deg, #059669, #0d9488) !important;
+            color: #ffffff !important;
+            border: 0 !important;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, .25) !important;
+            text-shadow: none !important;
+        }
+        #view-quiz button[onclick="returnToUnits()"]:hover {
+            background: linear-gradient(135deg, #047857, #0f766e) !important;
+            color: #ffffff !important;
+            transform: translateY(-1px);
+            text-shadow: none !important;
+        }
+
+        /* Arabic Smart Teacher explanation: clearer, more detailed and interactive. */
+        #teacher-box {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 52%, #eff6ff 100%) !important;
+            border-color: #34d399 !important;
+        }
+        #teacher-box .teacher-title {
+            color: #065f46 !important;
+        }
+        #teacher-box .teacher-answer-label {
+            color: #047857 !important;
+        }
+        #teacher-box .teacher-step-label {
+            color: #0f766e !important;
+        }
+        #teacher-box .teacher-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #ffffff;
+            border: 1px solid #a7f3d0;
+            border-radius: 16px;
+            padding: 12px 13px;
+            box-shadow: 0 5px 14px rgba(15, 118, 110, .07);
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+            animation: teacherStepIn .35s ease both;
+        }
+        #teacher-box .teacher-step:hover {
+            transform: translateY(-2px);
+            border-color: #34d399;
+            box-shadow: 0 9px 20px rgba(15, 118, 110, .12);
+        }
+        #teacher-box .teacher-step-number {
+            flex: 0 0 30px;
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #059669, #0d9488);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(5, 150, 105, .2);
+        }
+        #teacher-box .teacher-step-content {
+            flex: 1;
+            color: #1f2937;
+            font-size: .9rem;
+            line-height: 1.9;
+        }
+        #teacher-box .teacher-final {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #d1fae5, #ccfbf1);
+            border: 1px solid #6ee7b7;
+            color: #064e3b;
+            font-weight: 900;
+        }
+        #teacher-box .teacher-final strong {
+            color: #047857;
+        }
+        #teacher-box button {
+            background: linear-gradient(135deg, #059669, #0d9488) !important;
+            text-shadow: none !important;
+        }
+        @keyframes teacherStepIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-slate-900 flex flex-col min-h-screen">
+
+    <!-- Modern Header -->
+    <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl py-3.5 px-4 md:px-6 mb-5 border-b border-indigo-700/50">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-cyan-500 to-indigo-600 p-2.5 rounded-2xl shadow-lg text-white flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-sm md:text-lg font-black tracking-wide text-cyan-200">مدرسة عبد الله بن علي المسند الإعدادية للبنين</h1>
+                    <p class="text-[11px] text-indigo-200 font-semibold">قسم الرياضيات - منصة التدريبات الإثرائية التفاعلية (2026-2027)</p>
+                </div>
+            </div>
+            <div id="user-badge" class="hidden bg-indigo-950/80 backdrop-blur-md px-4 py-2 rounded-2xl text-xs font-bold shadow-inner border border-indigo-500/40 flex items-center gap-2.5">
+                <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span>البطل: <span id="lbl-student-name" class="text-white font-extrabold"></span></span>
+                </span>
+                <span class="text-indigo-500">|</span>
+                <span>الصف: <span id="lbl-student-grade" class="text-cyan-300 font-extrabold"></span></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 w-full mb-10">
+
+        <!-- VIEW 1: Registration Screen -->
+        <section id="view-login" class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-7 md:p-9 border border-indigo-100 max-w-md mx-auto mt-8 transition-all duration-300">
+            <div class="text-center mb-6">
+                <div class="inline-flex bg-gradient-to-tr from-cyan-50 to-indigo-50 text-indigo-600 p-3.5 rounded-3xl text-2xl mb-3 shadow-sm border border-indigo-200">
+                    <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </div>
+                <h2 class="text-xl font-black text-slate-900">مرحباً بك في تحدي الرياضيات</h2>
+                <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">سجل اسمك وصفك للبدء في التدرب على أسئلة الامتحانات الإثرائية</p>
+            </div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs md:text-sm font-extrabold text-slate-700 mb-1.5">اسم الطالب الثلاثي:</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-indigo-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.654 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                        <input type="text" id="input-name" required class="w-full pr-10 pl-3.5 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-bold text-sm text-slate-800" placeholder="مثال: راشد محمد المهندي">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs md:text-sm font-extrabold text-slate-700 mb-1.5">الصف الدراسي:</label>
+                    <div class="relative">
+                        <select id="input-grade" class="w-full px-3.5 py-3 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-bold text-sm text-slate-800 appearance-none">
+                            <option value="1">الثامن 1</option>
+                            <option value="2">الثامن 2</option>
+                            <option value="3">الثامن 3</option>
+                            <option value="4">الثامن 4</option>
+                            <option value="5">الثامن 5</option>
+                            <option value="6">الثامن 6</option>
+                            <option value="7">الثامن 7</option>
+                        </select>
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 hover:from-indigo-700 hover:to-blue-800 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-indigo-500/25 transition transform active:scale-95 text-sm md:text-base flex items-center justify-center gap-2">
+                    <span>انطلق إلى تحدي الأسئلة</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </button>
+            </form>
+        </section>
+
+        <!-- VIEW 2: Units Menu Screen -->
+        <section id="view-units" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl shadow-xl border border-indigo-100 p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-900">اختر الوحدة الدراسية للتدريب</h2>
+                    <p class="text-xs md:text-sm text-slate-500 mt-0.5 font-medium">اختر الدرس لعرض الأسئلة أو ابدأ اختبار "اختبر نفسك"</p>
+                </div>
+                <button onclick="logout()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2.5 rounded-xl font-bold transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    <span>تغيير بيانات البطل</span>
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Unit 1 Card -->
+                <div class="bg-white rounded-3xl shadow-xl border-2 border-indigo-100 p-5 md:p-6 flex flex-col justify-between hover:border-indigo-300 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-indigo-50 text-indigo-700 text-xs font-black px-3 py-1 rounded-xl border border-indigo-200">الوحدة الأولى</span>
+                            <span class="text-xs text-indigo-900 font-extrabold bg-indigo-50 px-2.5 py-1 rounded-lg">الأعداد الحقيقية</span>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900 mb-2">دروس الأعداد الحقيقية</h3>
+                        <p class="text-slate-600 text-xs md:text-sm mb-3 font-medium">اختر الدرس للتدرب على أسئلته الرسمية:</p>
+                        
+                        <!-- Unit 1 Lessons (All visible, no inner scroll/overflow) -->
+                        <div class="space-y-1.5 mb-5">
+                            <div class="grid grid-cols-1 gap-1.5">
+                                <button onclick="startLesson(1, 1)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-1) الأعداد النسبية في صورة كسور عشرية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">6 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 2)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-2) الأعداد غير النسبية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 3)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-3) مقارنة وترتيب الأعداد الحقيقية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 4)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-4) إيجاد قيم الجذور التربيعية والتكعيبية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 5)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-5) حل المعادلات بالجذور التربيعية والتكعيبية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 6)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-6) استعمال خواص الأسس الصحيحة</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 7)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-7) خواص أخرى للأسس الصحيحة</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(1, 9)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100 text-indigo-950 text-xs md:text-[13px] font-bold transition border border-indigo-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (1-9) الصيغة العلمية</span>
+                                    <span class="text-[11px] bg-indigo-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="startRandomQuiz(1)" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2 text-xs md:text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        <span>اختبر نفسك في دروس الوحدة الأولى</span>
+                    </button>
+                </div>
+
+                <!-- Unit 2 Card -->
+                <div class="bg-white rounded-3xl shadow-xl border-2 border-violet-100 p-5 md:p-6 flex flex-col justify-between hover:border-violet-300 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="bg-violet-50 text-violet-700 text-xs font-black px-3 py-1 rounded-xl border border-violet-200">الوحدة الثانية</span>
+                            <span class="text-xs text-violet-900 font-extrabold bg-violet-50 px-2.5 py-1 rounded-lg">المعادلات الخطية</span>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-900 mb-2">تحليل المعادلات الخطية وحلها</h3>
+                        <p class="text-slate-600 text-xs md:text-sm mb-3 font-medium">اختر الدرس للتدرب على أسئلته الرسمية:</p>
+                        
+                        <!-- Unit 2 Lessons -->
+                        <div class="space-y-1.5 mb-5">
+                            <div class="grid grid-cols-1 gap-1.5">
+                                <button onclick="startLesson(2, 1)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-violet-50/70 hover:bg-violet-100 text-violet-950 text-xs md:text-[13px] font-bold transition border border-violet-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (2-1) تجميع الحدود المتشابهة لحل المعادلات</span>
+                                    <span class="text-[11px] bg-violet-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                                <button onclick="startLesson(2, 2)" class="w-full text-right px-3.5 py-2.5 rounded-2xl bg-violet-50/70 hover:bg-violet-100 text-violet-950 text-xs md:text-[13px] font-bold transition border border-violet-100 flex justify-between items-center shadow-sm">
+                                    <span class="truncate pl-2">الدرس (2-2) حل معادلات تتضمن متغيرات في طرفيها</span>
+                                    <span class="text-[11px] bg-violet-600 text-white px-2.5 py-0.5 rounded-xl font-bold shadow-sm flex-shrink-0">3 أسئلة</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="startRandomQuiz(2)" class="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-violet-500/25 transition flex items-center justify-center gap-2 text-xs md:text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        <span>اختبر نفسك في دروس الوحدة الثانية</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: Quiz Screen -->
+        <section id="view-quiz" class="hidden space-y-5">
+            <div class="bg-white p-4 rounded-3xl shadow-xl border border-indigo-100 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div>
+                    <span id="quiz-header-title" class="text-[11px] font-black text-indigo-700 uppercase bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200">الوحدة الأولى</span>
+                    <h3 id="quiz-lesson-title" class="text-base md:text-lg font-black text-slate-900 mt-1">اسم الدرس</h3>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-left bg-slate-50 px-3.5 py-1.5 rounded-2xl border border-slate-200">
+                        <span class="text-[10px] text-slate-400 block font-extrabold uppercase">تقدم الأسئلة</span>
+                        <span class="text-base font-black text-indigo-700"><span id="current-q-num">1</span> / <span id="total-q-num">5</span></span>
+                    </div>
+                    <button onclick="returnToUnits()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span>الرئيسية</span>
+                    </button>
+                </div>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                <div id="quiz-progress" class="h-full bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-400 rounded-full transition-all duration-500" style="width:0%"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl shadow-2xl border border-indigo-100 p-6 md:p-8 space-y-5 relative overflow-hidden">
+                <div class="border-b border-slate-100 pb-5 text-right">
+                    <div class="flex justify-between items-center mb-3">
+                        <span id="attempt-badge" class="hidden bg-amber-50 text-amber-800 text-xs font-bold px-3 py-1 rounded-xl border border-amber-200 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <span>محاولة أخيرة متبقية</span>
+                        </span>
+                        <span class="text-[11px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100">سؤال اختيار من متعدد رسمي</span>
+                    </div>
+                    <!-- Right-aligned question statement with LTR math blocks -->
+                    <div id="question-text" class="text-lg md:text-xl font-extrabold text-slate-900 leading-relaxed text-right" style="direction: rtl;">
+                        <!-- Question text here -->
+                    </div>
+                </div>
+
+                <!-- Options List -->
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Options here -->
+                </div>
+
+                <!-- Teacher AI Explanation Box -->
+                <div id="teacher-box" class="hidden bg-indigo-50/80 border-2 border-indigo-200 rounded-3xl p-4 md:p-5 space-y-3 animate-fadeIn text-right shadow-sm" style="direction: rtl;">
+                    <div class="flex justify-between items-center">
+                        <button onclick="playVoiceExplanation()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                            <span>استماع إلى الشرح بالعربية</span>
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <h4 class="teacher-title text-sm font-black">شرح المعلم الذكي باللغة العربية:</h4>
+                            <div class="w-7 h-7 rounded-xl bg-indigo-200 flex items-center justify-center text-base shadow-sm">👨‍🏫</div>
+                        </div>
+                    </div>
+                    <div id="explanation-text" class="text-slate-800 text-xs md:text-sm leading-relaxed bg-white p-3.5 rounded-2xl border border-indigo-100 text-right shadow-inner font-medium" style="direction: rtl;">
+                        <!-- Explanation -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: Results Screen -->
+        <section id="view-results" class="hidden bg-white rounded-3xl shadow-2xl p-7 md:p-9 border border-indigo-100 text-center space-y-5">
+            <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center text-3xl mx-auto shadow-inner border border-amber-200">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900">أحسنت يا بطل الإعدادية!</h2>
+                <p class="text-xs md:text-sm text-slate-500 mt-1 font-medium">لقد أتممت التدريب الإثرائي بكل تميز واقتدار.</p>
+            </div>
+
+            <div class="bg-indigo-50 rounded-2xl p-5 max-w-sm mx-auto border border-indigo-200 shadow-sm">
+                <span class="text-xs font-black text-indigo-800 block mb-1">النتيجة النهائية للتحدي</span>
+                <div class="text-3xl md:text-4xl font-black text-indigo-700"><span id="final-score">0</span> / <span id="final-total">0</span></div>
+                <p id="result-message" class="text-xs md:text-sm font-extrabold text-indigo-900 mt-1.5">ممتاز جداً!</p>
+            </div>
+
+            <!-- Star Board -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 max-w-sm mx-auto shadow-sm">
+                <h3 class="text-xs md:text-sm font-extrabold text-slate-800 mb-1.5 flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <span>لوحة نجوم التميز الإنجازية</span>
+                </h3>
+                <div id="star-board-icons" class="flex justify-center gap-1.5 text-2xl mb-2">
+                    ⭐⭐⭐⭐⭐
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium leading-relaxed">تم توثيق إنجازك في سجل مدرسة عبد الله بن علي المسند الإعدادية للبنين.</p>
+            </div>
+
+            <button onclick="returnToUnits()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-7 py-3 rounded-2xl shadow-xl shadow-indigo-500/25 transition text-xs md:text-sm">
+                العودة للرئيسية والوحدات
+            </button>
+        </section>
+
+    </main>
+
+    <script>
+        // Helper function for formatted stacked fractions
+        function f(num, den) {
+            return `<span class="fraction"><span class="numerator">${num}</span><span class="denominator">${den}</span></span>`;
+        }
+
+        // Helper function for clear radicals over numbers
+        function rad(content) {
+            return `<span class="radical"><span class="radical-sign">√</span><span class="radical-content">${content}</span></span>`;
+        }
+
+        function cbrd(content) {
+            return `<span class="radical"><span class="radical-sign">∛</span><span class="radical-content">${content}</span></span>`;
+        }
+
+        // Helper function for recurring decimals with clear overline
+        function rec(baseNum, repStr) {
+            return `<span class="math-inline">${baseNum}<span class="recurring">${repStr}</span></span>`;
+        }
+
+        // Complete accurate question database containing ONLY official MCQs from the PDF per lesson
+        const questionDatabase = {
+            1: {
+                title: "الوحدة الأولى: الأعداد الحقيقية",
+                lessons: {
+                    1: {
+                        name: "الدرس (1-1) الأعداد النسبية في صورة كسور عشرية",
+                        questions: [
+                            {
+                                q: `ما قوة العدد 10 التي تلزم لضرب المعادلة <span class="math-inline">x = 0.${rec("", "7")}</span> لكتابتها في صورة كسر اعتيادي؟`,
+                                options: ["10¹", "10²", "10³", "10⁴"],
+                                correct: 0,
+                                explanation: `بما أن العدد العشري الدوري يحتوي على منزلة عشرية دورية واحدة (<span class="math-inline">0.${rec("", "7")}</span>)، فإننا نضرب المعادلة في <span class="math-inline">10¹</span> لتحريك الفاصلة.`
+                            },
+                            {
+                                q: `ما قوة العدد 10 التي تلزم لضرب المعادلة <span class="math-inline">x = 0.${rec("", "38")}</span> ، لكتابتها في صورة كسر اعتيادي؟`,
+                                options: ["10¹", "10²", "10³", "10⁴"],
+                                correct: 1,
+                                explanation: `بما أن الجزء الدوري يتكون من منزلتين (<span class="math-inline">0.${rec("", "38")}</span>)، فإننا نضرب المعادلة في <span class="math-inline">10²</span> أي 100.`
+                            },
+                            {
+                                q: `اكتب العدد <span class="math-inline">0.${rec("", "3")}</span> في صورة كسر اعتيادي.`,
+                                options: [f(3, 99), f(3, 10), f(3, 9), f(9, 3)],
+                                correct: 2,
+                                explanation: `العدد العشري الدوري <span class="math-inline">0.${rec("", "3")}</span> يساوي ${f(3, 9)} وعند تبسيطه يصبح ${f(1, 3)}.`
+                            },
+                            {
+                                q: `اكتب العدد <span class="math-inline">0.${rec("", "21")}</span> في صورة كسر اعتيادي.`,
+                                options: [f(21, 9), f(21, 99), f(21, 10), f(21, 100)],
+                                correct: 1,
+                                explanation: `العدد العشري الدوري <span class="math-inline">0.${rec("", "21")}</span> يكتب بوضع العدد في البسط ومقام من تسعتين ليصبح ${f(21, 99)}.`
+                            },
+                            {
+                                q: `اكتب العدد <span class="math-inline">0.${rec("", "68")}</span> في صورة كسر اعتيادي.`,
+                                options: [f(68, 9), f(68, 10), f(68, 99), f(68, 100)],
+                                correct: 2,
+                                explanation: `العدد الدوري <span class="math-inline">0.${rec("", "68")}</span> يساوي ${f(68, 99)} لأن المنزلتين مكررتان دورياً.`
+                            },
+                            {
+                                q: `اكتب العدد <span class="math-inline">3.${rec("", "7")}</span> في صورة كسر اعتيادي.`,
+                                options: [f(37, 10), f(37, 99), f(37, 9), f(34, 9)],
+                                correct: 3,
+                                explanation: `العدد العشري الدوري <span class="math-inline">3.${rec("", "7")}</span> يحول إلى كسر اعتيادي كالتالي: <span class="math-inline">3 + ${f(7, 9)} = ${f(27, 9)} + ${f(7, 9)} = ${f(34, 9)}</span>.`
+                            }
+                        ]
+                    },
+                    2: {
+                        name: "الدرس (1-2) الأعداد غير النسبية",
+                        questions: [
+                            {
+                                q: `أي من الأعداد الآتية يمثل عدد غير نسبي؟`,
+                                options: [`<span class="math-inline">0.5798564...</span>`, f(-3, 4), `<span class="math-inline">3.4</span>`, rad("25")],
+                                correct: 0,
+                                explanation: `العدد غير النسبي هو عدد عشري غير منتهي وغير دوري مثل <span class="math-inline">0.5798564...</span>.`
+                            },
+                            {
+                                q: `أي من الأعداد الآتية يمثل عدد نسبي؟`,
+                                options: [`<span class="math-inline">π</span>`, rad("23"), `<span class="math-inline">0.52</span>`, `<span class="math-inline">0.23223222...</span>`],
+                                correct: 2,
+                                explanation: `العدد <span class="math-inline">0.52</span> هو عدد عشري منتهي فهو عدد نسبي.`
+                            },
+                            {
+                                q: `أي من الأعداد الآتية يمثل عدد مربع كامل؟`,
+                                options: ["11", "15", "32", "49"],
+                                correct: 3,
+                                explanation: `العدد 49 هو مربع كامل لأن جذره التربيعي عدد صحيح (<span class="math-inline">${rad("49")} = 7</span>).`
+                            }
+                        ]
+                    },
+                    3: {
+                        name: "الدرس (1-3) مقارنة وترتيب الأعداد الحقيقية",
+                        questions: [
+                            {
+                                q: `بين أي عددين كليين يقع العدد ${rad("12")}؟`,
+                                options: ["11, 13", "2, 3", "3, 4", "5, 6"],
+                                correct: 2,
+                                explanation: `بما أن <span class="math-inline">${rad("9")} = 3</span> و <span class="math-inline">${rad("16")} = 4</span>، فإن <span class="math-inline">${rad("12")}</span> يقع بين العددين 3 و 4.`
+                            },
+                            {
+                                q: `أي الأعداد التالية تمثل القيمة التقريبية للعدد ${rad("23")}؟`,
+                                options: ["5", "6", "21", rad("33")],
+                                correct: 0,
+                                explanation: `القيمة التقريبية لـ <span class="math-inline">${rad("23")}</span> أقرب إلى <span class="math-inline">${rad("25")} = 5</span>.`
+                            },
+                            {
+                                q: `أي الأعداد التالية يقع بين العددين الكليين 6 ، 7؟`,
+                                options: [rad("33"), rad("45"), rad("13"), rad("28")],
+                                correct: 1,
+                                explanation: `العدد الذي يقع جذره بين 6 و 7 يجب أن يكون محصوراً بين 36 و 49، وهو <span class="math-inline">${rad("45")}</span>.`
+                            }
+                        ]
+                    },
+                    4: {
+                        name: "الدرس (1-4) إيجاد قيم الجذور التربيعية والتكعيبية",
+                        questions: [
+                            {
+                                q: `أوجد قيمة <span class="math-inline">${rad("81")}</span>`,
+                                options: ["7", "8", "9", "18"],
+                                correct: 2,
+                                explanation: `جذر 81 التربيعي هو 9 لأن <span class="math-inline">9 × 9 = 81</span>.`
+                            },
+                            {
+                                q: `أوجد قيمة <span class="math-inline">${cbrd("27")}</span>`,
+                                options: ["2", "3", "7", "9"],
+                                correct: 1,
+                                explanation: `الجذر التكعيبي للعدد 27 هو 3 لأن <span class="math-inline">3 × 3 × 3 = 27</span>.`
+                            },
+                            {
+                                q: `شريحة إلكترونية مربعة الشكل مساحتها <span class="math-inline">25 cm²</span> ، ما طول ضلع الشريحة؟`,
+                                options: [`<span class="math-inline">2 cm</span>`, `<span class="math-inline">3 cm</span>`, `<span class="math-inline">4 cm</span>`, `<span class="math-inline">5 cm</span>`],
+                                correct: 3,
+                                explanation: `طول ضلع المربع يساوي جذر المساحة: <span class="math-inline">${rad("25")} = 5 cm</span>.`
+                            }
+                        ]
+                    },
+                    5: {
+                        name: "الدرس (1-5) حل المعادلات باستخدام الجذور التربيعية والتكعيبية",
+                        questions: [
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">x² = 16</span> ؟`,
+                                options: [`<span class="math-inline">±3</span>`, `<span class="math-inline">±4</span>`, `<span class="math-inline">±6</span>`, `<span class="math-inline">±8</span>`],
+                                correct: 1,
+                                explanation: `باخذ الجذر التربيعي للطرفين: <span class="math-inline">x = ±${rad("16")} = ±4</span>.`
+                            },
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">y³ = 8</span> ؟`,
+                                options: ["2", "3", "4", "6"],
+                                correct: 0,
+                                explanation: `باخذ الجذر التكعيبي للطرفين: <span class="math-inline">y = ${cbrd("8")} = 2</span>.`
+                            },
+                            {
+                                q: `أوجد ناتج المقدار: <span class="math-inline">${cbrd("64")} + 2</span>`,
+                                options: ["2", "4", "6", "8"],
+                                correct: 2,
+                                explanation: `أولاً نحسب <span class="math-inline">${cbrd("64")} = 4</span>، ثم نجمع 2 ليصبح الناتج <span class="math-inline">4 + 2 = 6</span>.`
+                            }
+                        ]
+                    },
+                    6: {
+                        name: "الدرس (1-6) استعمال خواص الأسس الصحيحة",
+                        questions: [
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">8⁵ × 8²</span> ؟`,
+                                options: [`<span class="math-inline">8¹⁰</span>`, `<span class="math-inline">8⁷</span>`, `<span class="math-inline">64⁷</span>`, `<span class="math-inline">16⁷</span>`],
+                                correct: 1,
+                                explanation: `عند ضرب قوتين لهما نفس الأساس نجمع الأسس: <span class="math-inline">8^(5+2) = 8⁷</span>.`
+                            },
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">9⁷ ÷ 9³</span> ؟`,
+                                options: [`<span class="math-inline">9⁴</span>`, `<span class="math-inline">9¹⁰</span>`, `<span class="math-inline">18⁴</span>`, `<span class="math-inline">81⁴</span>`],
+                                correct: 0,
+                                explanation: `عند قسمة قوتين لهما نفس الأساس نطرح الأسس: <span class="math-inline">9^(7-3) = 9⁴</span>.`
+                            },
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">3⁴ × 2⁴</span> ؟`,
+                                options: [`<span class="math-inline">5⁸</span>`, `<span class="math-inline">6⁸</span>`, `<span class="math-inline">5⁴</span>`, `<span class="math-inline">6⁴</span>`],
+                                correct: 3,
+                                explanation: `عند ضرب أساسين مختلفين لهما نفس الأس، نضرب الأساسين ونبقي الأس: <span class="math-inline">(3×2)⁴ = 6⁴</span>.`
+                            }
+                        ]
+                    },
+                    7: {
+                        name: "الدرس (1-7) خواص أخرى للأسس الصحيحة",
+                        questions: [
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">6⁻⁵</span> ؟`,
+                                options: [f(1, "6⁵"), f(1, "6⁻⁵"), f(1, "5⁶"), `<span class="math-inline">6⁵</span>`],
+                                correct: 0,
+                                explanation: `الأس السالب يعكس مكان العدد إلى المقام بأس موجب: <span class="math-inline">6⁻⁵</span> = ${f(1, "6⁵")}.`
+                            },
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">(${f(12, 65)})⁰</span> ؟`,
+                                options: [f(12, 65), f(65, 12), "0", "1"],
+                                correct: 3,
+                                explanation: `الإجابة الصحيحة: <span class="math-inline">1</span>.
+قاعدة الأس صفر: أي عدد أو مقدار غير الصفر مرفوع للقوة صفر يساوي <span class="math-inline">1</span>.
+إذن <span class="math-inline">(${f(12, 65)})⁰ = 1</span>.`
+                            },
+                            {
+                                q: `أي المقادير التالية يكافئ المقدار <span class="math-inline">${f(1, "5⁻³")}</span> ؟`,
+                                options: [f(1, "5³"), f(1, "5⁻³"), `<span class="math-inline">5⁻³</span>`, `<span class="math-inline">5³</span>`],
+                                correct: 3,
+                                explanation: `نستخدم خاصية الأس السالب: عند نقل القوة من المقام إلى البسط يتغير الأس من سالب إلى موجب. <span class="math-inline">${f(1, "5⁻³")} = 5³</span>. إذن الإجابة الصحيحة هي <span class="math-inline">5³</span>.`
+                            }
+                        ]
+                    },
+                    9: {
+                        name: "الدرس (1-9) الصيغة العلمية",
+                        questions: [
+                            {
+                                q: `أي الأعداد التالية مكتوب بالصيغة العلمية؟`,
+                                options: ["780,000,000", "0.000078", `<span class="math-inline">7.8 × 10⁹</span>`, `<span class="math-inline">35.6 × 10⁶</span>`],
+                                correct: 2,
+                                explanation: `الصيغة العلمية تكون على صورة <span class="math-inline">a × 10ⁿ</span> حيث <span class="math-inline">1 ≤ a < 10</span>.`
+                            },
+                            {
+                                q: `أي الأعداد التالية مكتوب بالصيغة القياسية؟`,
+                                options: ["350,000", `<span class="math-inline">1.9 × 10⁶</span>`, `<span class="math-inline">4.12 × 10⁻⁵</span>`, `<span class="math-inline">95.2 × 10³</span>`],
+                                correct: 0,
+                                explanation: `العدد 350,000 مكتوب بالصيغة القياسية العادية بينما البقية بصيغ علمية.`
+                            },
+                            {
+                                q: `اكتب العدد التالي بالصيغة القياسية: <span class="math-inline">2.73 × 10⁶</span>`,
+                                options: ["273", "27,300", "273,000", "2,730,000"],
+                                correct: 3,
+                                explanation: `نحرك الفاصلة 6 منازل لليمين فيصبح العدد <span class="math-inline">2,730,000</span>.`
+                            }
+                        ]
+                    }
+                }
+            },
+            2: {
+                title: "الوحدة الثانية: تحليل المعادلات الخطية وحلها",
+                lessons: {
+                    1: {
+                        name: "الدرس (2-1) تجميع الحدود المتشابهة لحل المعادلات",
+                        questions: [
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">5y + 2y = 14</span> ؟`,
+                                options: [`<span class="math-inline">y = 2</span>`, `<span class="math-inline">y = 5</span>`, `<span class="math-inline">y = 7</span>`, `<span class="math-inline">y = 14</span>`],
+                                correct: 0,
+                                explanation: `نجمع الحدود المتشابهة: <span class="math-inline">7y = 14</span>، ثم نقسم الطرفين على 7 فينتج <span class="math-inline">y = 2</span>.`
+                            },
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">4.5x - 0.5x = 16</span> ؟`,
+                                options: [`<span class="math-inline">x = 2</span>`, `<span class="math-inline">x = 4</span>`, `<span class="math-inline">x = 8</span>`, `<span class="math-inline">x = 16</span>`],
+                                correct: 1,
+                                explanation: `نجمع الحدود المتشابهة: <span class="math-inline">4.5x - 0.5x = 4x</span>، فتكون المعادلة <span class="math-inline">4x = 16</span>. نقسم الطرفين على 4، فنحصل على <span class="math-inline">x = 4</span>.`
+                            },
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">${f(3, 7)}m - ${f(2, 7)}m = 10</span> ؟`,
+                                options: [`<span class="math-inline">m = ${f("2", "9")}</span>`, `<span class="math-inline">m = ${f("6", "9")}</span>`, `<span class="math-inline">m = 6</span>`, `<span class="math-inline">m = 70</span>`],
+                                correct: 3,
+                                explanation: `نطرح الكسور: <span class="math-inline">${f(1, 7)}m = 10</span>، وبضرب الطرفين في 7 ينتج <span class="math-inline">m = 70</span>.`
+                            }
+                        ]
+                    },
+                    2: {
+                        name: "الدرس (2-2) حل معادلات تتضمن متغيرات في طرفيها",
+                        questions: [
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">6y + 3 = 2y + 11</span> ؟`,
+                                options: [`<span class="math-inline">y = 2</span>`, `<span class="math-inline">y = 3</span>`, `<span class="math-inline">y = 6</span>`, `<span class="math-inline">y = 11</span>`],
+                                correct: 0,
+                                explanation: `ننقل المتغيرات لطرف والأعداد للآخر: <span class="math-inline">6y - 2y = 11 - 3</span> إذن <span class="math-inline">4y = 8</span> ومنه <span class="math-inline">y = 2</span>.`
+                            },
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">5m - 7 = 3m + 13</span> ؟`,
+                                options: [`<span class="math-inline">m = 3</span>`, `<span class="math-inline">m = 5</span>`, `<span class="math-inline">m = 10</span>`, `<span class="math-inline">m = 13</span>`],
+                                correct: 2,
+                                explanation: `بطرح <span class="math-inline">3m</span> وإضافة 7 للطرفين: <span class="math-inline">2m = 20</span> إذن <span class="math-inline">m = 10</span>.`
+                            },
+                            {
+                                q: `ما حل المعادلة: <span class="math-inline">5.3w + 9 = 2.3w + 15</span> ؟`,
+                                options: [`<span class="math-inline">w = 1</span>`, `<span class="math-inline">w = 2</span>`, `<span class="math-inline">w = 5.3</span>`, `<span class="math-inline">w = 15</span>`],
+                                correct: 1,
+                                explanation: `بطرح <span class="math-inline">2.3w</span> من الطرفين وطرح 9: <span class="math-inline">3w = 6</span> إذن <span class="math-inline">w = 2</span>.`
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Application State
+        let currentUser = { name: "", grade: "" };
+        let currentQuiz = {
+            unitId: null,
+            lessonId: null,
+            isRandom: false,
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            attempts: 0
+        };
+
+        // DOM Elements
+        const viewLogin = document.getElementById('view-login');
+        const viewUnits = document.getElementById('view-units');
+        const viewQuiz = document.getElementById('view-quiz');
+        const viewResults = document.getElementById('view-results');
+        const userBadge = document.getElementById('user-badge');
+        const lblStudentName = document.getElementById('lbl-student-name');
+        const lblStudentGrade = document.getElementById('lbl-student-grade');
+
+        // Login Handler
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('input-name').value.trim();
+            const gradeInput = document.getElementById('input-grade').value;
+
+            if (!nameInput) return;
+
+            currentUser.name = nameInput;
+            currentUser.grade = gradeInput;
+
+            lblStudentName.textContent = currentUser.name;
+            lblStudentGrade.textContent = "الثامن " + currentUser.grade;
+            userBadge.classList.remove('hidden');
+
+            viewLogin.classList.add('hidden');
+            viewUnits.classList.remove('hidden');
+        });
+
+        function logout() {
+            viewUnits.classList.add('hidden');
+            viewLogin.classList.remove('hidden');
+            userBadge.classList.add('hidden');
+        }
+
+        function returnToUnits() {
+            viewQuiz.classList.add('hidden');
+            viewResults.classList.add('hidden');
+            viewUnits.classList.remove('hidden');
+        }
+
+        // Start Lesson Quiz (Only Lesson Questions)
+        function startLesson(unitId, lessonId) {
+            const lessonData = questionDatabase[unitId].lessons[lessonId];
+            if (!lessonData) return;
+
+            currentQuiz = {
+                unitId: unitId,
+                lessonId: lessonId,
+                isRandom: false,
+                questions: [...lessonData.questions],
+                currentIndex: 0,
+                score: 0,
+                attempts: 0
+            };
+
+            document.getElementById('quiz-header-title').textContent = questionDatabase[unitId].title;
+            document.getElementById('quiz-lesson-title').textContent = lessonData.name;
+            document.getElementById('total-q-num').textContent = currentQuiz.questions.length;
+
+            viewUnits.classList.add('hidden');
+            viewQuiz.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Start Random Quiz ("اختبر نفسك" - exactly 10 questions randomly chosen from all unit lessons)
+        function startRandomQuiz(unitId) {
+            let allQuestions = [];
+            const unitLessons = questionDatabase[unitId].lessons;
+            for (let lId in unitLessons) {
+                allQuestions = allQuestions.concat(unitLessons[lId].questions);
+            }
+
+            // Shuffle questions
+            allQuestions.sort(() => Math.random() - 0.5);
+            const targetCount = 10;
+            const selectedQuestions = allQuestions.slice(0, Math.min(targetCount, allQuestions.length));
+
+            currentQuiz = {
+                unitId: unitId,
+                lessonId: null,
+                isRandom: true,
+                questions: selectedQuestions,
+                currentIndex: 0,
+                score: 0,
+                attempts: 0
+            };
+
+            document.getElementById('quiz-header-title').textContent = "اختبر نفسك في دروس الوحدة " + (unitId === 1 ? "الأولى" : "الثانية");
+            document.getElementById('quiz-lesson-title').textContent = "اختبار تجريبي شامل (10 أسئلة عشوائية)";
+            document.getElementById('total-q-num').textContent = currentQuiz.questions.length;
+
+            viewUnits.classList.add('hidden');
+            viewQuiz.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // Load Current Question
+        function loadQuestion() {
+            currentQuiz.attempts = 0;
+            document.getElementById('attempt-badge').classList.add('hidden');
+            document.getElementById('teacher-box').classList.add('hidden');
+
+            const qObj = currentQuiz.questions[currentQuiz.currentIndex];
+            document.getElementById('current-q-num').textContent = currentQuiz.currentIndex + 1;
+            const progress = ((currentQuiz.currentIndex + 1) / currentQuiz.questions.length) * 100;
+            document.getElementById('quiz-progress').style.width = progress + '%';
+            document.getElementById('question-text').innerHTML = qObj.q;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            qObj.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "option-card w-full p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-indigo-50/85 hover:border-indigo-400 font-extrabold text-slate-800 transition shadow-sm cursor-pointer";
+                const letterLabel = String.fromCharCode(65 + idx); // A, B, C, D
+                btn.innerHTML = `
+                    <div class="option-content">${opt}</div>
+                    <div class="option-badge w-7 h-7 rounded-xl bg-white border border-slate-300 flex items-center justify-center text-xs font-black text-slate-700 shadow-sm">${letterLabel}</div>
+                `;
+                btn.onclick = () => handleAnswer(idx, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // Build a student-friendly written solution: answer + clear steps.
+        function renderSolution(qObj) {
+            const box = document.getElementById('explanation-text');
+
+            // Keep the original Arabic mathematical HTML so radicals, fractions,
+            // exponents and other formatting remain clear for the student.
+            const answerHtml = qObj.options[qObj.correct];
+
+            // Convert the existing explanation into readable Arabic steps without
+            // changing its mathematical content.
+            const temp = document.createElement('div');
+            temp.innerHTML = qObj.explanation;
+            const rawText = (temp.textContent || temp.innerText || '').trim();
+
+            let rawSteps = rawText
+                .split(/\n+/)
+                .map(x => x.trim())
+                .filter(Boolean)
+                .filter(x => !x.startsWith('الإجابة الصحيحة'));
+
+            // Many existing explanations are written as one sentence. Split them
+            // gently at common Arabic solution transitions so the student sees
+            // a real step-by-step explanation, without rewriting the source.
+            if (rawSteps.length === 1) {
+                rawSteps = rawSteps[0]
+                    .split(/(?=(?:أولاً|ثانياً|ثالثاً|ثم|إذن|ومنه|لذلك|فتكون|ينتج|نحصل|نطرح|نجمع|نقسم|نضرب|بأخذ|نحرك|عند)\b)/)
+                    .map(x => x.trim())
+                    .filter(Boolean);
+            }
+
+            const steps = rawSteps.length ? rawSteps : ['راجع القاعدة ثم طبّقها على المعطيات خطوة بخطوة.'];
+
+            box.innerHTML = `
+                <div class="answer-summary">
+                    <div class="teacher-answer-label text-[11px] font-black mb-1">الإجابة الصحيحة</div>
+                    <div class="text-base md:text-lg font-black text-emerald-900 text-center py-1" dir="ltr">${answerHtml}</div>
+                </div>
+
+                <div class="teacher-step-label text-[11px] font-black mb-2 mt-3">
+                    👨‍🏫 طريقة الحل خطوة بخطوة
+                </div>
+
+                <div class="solution-steps">
+                    ${steps.map((step, i) => `
+                        <div class="teacher-step" style="animation-delay:${i * 70}ms">
+                            <span class="teacher-step-number">${i + 1}</span>
+                            <div class="teacher-step-content" dir="rtl">${step}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="teacher-final">
+                    <strong>✓ النتيجة:</strong>
+                    <span dir="ltr">${answerHtml}</span>
+                </div>`;
+        }
+
+
+        // Handle Answer Selection
+        function handleAnswer(selectedIndex, btnElement) {
+            const qObj = currentQuiz.questions[currentQuiz.currentIndex];
+            const allOptionBtns = document.querySelectorAll('#options-container button');
+
+            if (selectedIndex === qObj.correct) {
+                btnElement.classList.remove('bg-slate-50', 'border-slate-200');
+                btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'shadow-md');
+                const badge = btnElement.querySelector('.option-badge');
+                if(badge) {
+                    badge.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+                    badge.classList.add('bg-emerald-700', 'text-white', 'border-emerald-800');
+                }
+                playSound('correct');
+                showToast(currentQuiz.attempts === 0 ? 'ممتاز! إجابة صحيحة من المحاولة الأولى 🌟' : 'أحسنت! وصلت إلى الإجابة الصحيحة 👏', 'success');
+
+                if (currentQuiz.attempts === 0) {
+                    currentQuiz.score += 1;
+                }
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1200);
+
+            } else {
+                currentQuiz.attempts++;
+                playSound('wrong');
+
+                if (currentQuiz.attempts === 1) {
+                    btnElement.classList.add('bg-rose-50', 'border-rose-300', 'opacity-60');
+                    btnElement.disabled = true;
+                    document.getElementById('attempt-badge').classList.remove('hidden');
+                    showToast("إجابة غير صحيحة! لديك فرصة أخرى للمحاولة.", "warning");
+                } else {
+                    btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+                    const badge = btnElement.querySelector('.option-badge');
+                    if(badge) {
+                        badge.classList.remove('bg-white', 'text-slate-700');
+                        badge.classList.add('bg-rose-700', 'text-white');
+                    }
+
+                    const correctBtn = allOptionBtns[qObj.correct];
+                    correctBtn.classList.remove('bg-slate-50', 'border-slate-200');
+                    correctBtn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-700', 'shadow-md');
+                    const correctBadge = correctBtn.querySelector('.option-badge');
+                    if(correctBadge) {
+                        correctBadge.classList.remove('bg-white', 'text-slate-700');
+                        correctBadge.classList.add('bg-emerald-800', 'text-white');
+                    }
+
+                    renderSolution(qObj);
+                    document.getElementById('teacher-box').classList.remove('hidden');
+                    document.getElementById('teacher-box').classList.add('student-feedback');
+                    document.getElementById('attempt-badge').classList.add('hidden');
+                    showToast("انتهت محاولاتك. إليك الشرح المفصل من المعلم الذكي.", "error");
+
+                    if (!document.getElementById('btn-next-step')) {
+                        const nextBtn = document.createElement('button');
+                        nextBtn.id = 'btn-next-step';
+                        nextBtn.className = "w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-2xl shadow-lg mt-3 transition text-xs md:text-sm";
+                        nextBtn.textContent = "الانتقال للسؤال التالي ➡️";
+                        nextBtn.onclick = () => {
+                            nextBtn.remove();
+                            nextQuestion();
+                        };
+                        document.getElementById('teacher-box').appendChild(nextBtn);
+                    }
+                }
+            }
+        }
+
+        function nextQuestion() {
+            currentQuiz.currentIndex++;
+            if (currentQuiz.currentIndex < currentQuiz.questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            viewQuiz.classList.add('hidden');
+            viewResults.classList.remove('hidden');
+
+            document.getElementById('final-score').textContent = currentQuiz.score;
+            document.getElementById('final-total').textContent = currentQuiz.questions.length;
+
+            const percentage = (currentQuiz.score / currentQuiz.questions.length) * 100;
+            let msg = "بداية موفقة، واصل التدريب!";
+            let stars = "⭐⭐⭐";
+            if (percentage >= 80) {
+                msg = "أداء مبهر وممتاز جداً! أنت بطل رياضيات حقاً.";
+                stars = "⭐⭐⭐⭐⭐";
+            } else if (percentage >= 50) {
+                msg = "جيد جداً، يمكنك تحقيق الدرجة الكاملة بمزيد من المراجعة.";
+                stars = "⭐⭐⭐⭐";
+            }
+            document.getElementById('result-message').textContent = msg;
+            document.getElementById('star-board-icons').textContent = stars;
+            playSound('success');
+        }
+
+        // Speech Synthesis for Teacher Explanation
+        function playVoiceExplanation() {
+            const qObj = currentQuiz.questions[currentQuiz.currentIndex];
+            // إظهار الحل المكتوب فور الضغط على زر الشرح الصوتي
+            renderSolution(qObj);
+            document.getElementById('teacher-box').classList.remove('hidden');
+
+            const answerDiv = document.createElement('div');
+            answerDiv.innerHTML = qObj.options[qObj.correct];
+            const answerText = (answerDiv.textContent || answerDiv.innerText || '').replace(/\s+/g, ' ').trim();
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = qObj.explanation;
+            const explanationText = (tempDiv.textContent || tempDiv.innerText || '').replace(/\s+/g, ' ').trim();
+            const speechText = `الإجابة الصحيحة هي: ${answerText}. طريقة الحل: ${explanationText}`;
+            const button = document.querySelector('#teacher-box button');
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.82;
+                utterance.pitch = 1.03;
+                const voices = window.speechSynthesis.getVoices();
+                const arabicVoice = voices.find(v => /^ar-SA$/i.test(v.lang)) ||
+                                    voices.find(v => /^ar(-|_)/i.test(v.lang)) ||
+                                    voices.find(v => v.lang && v.lang.toLowerCase().includes('ar'));
+                if (arabicVoice) {
+                    utterance.voice = arabicVoice;
+                    utterance.lang = arabicVoice.lang;
+                } else {
+                    // إبقاء النطق عربيًا حتى في المتصفحات التي تتأخر في تحميل الأصوات
+                    utterance.lang = 'ar-SA';
+                }
+                if (button) { button.classList.add('voice-active'); button.setAttribute('aria-label', 'جاري تشغيل الشرح باللغة العربية'); }
+                utterance.onend = () => { if (button) { button.classList.remove('voice-active'); button.setAttribute('aria-label', 'تشغيل الشرح الصوتي بالعربية'); } };
+                utterance.onerror = () => { if (button) button.classList.remove('voice-active'); };
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast('خاصية الشرح الصوتي غير متوفرة في متصفحك.', 'error');
+            }
+        }
+
+        // Web Audio API feedback tones
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.setValueAtTime(100, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'success') {
+                    const now = ctx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        g.gain.setValueAtTime(0.1, now + idx * 0.1);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.2);
+                        o.start(now + idx * 0.1);
+                        o.stop(now + idx * 0.1 + 0.2);
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function showToast(msg, type) {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-5 left-1/2 transform -translate-x-1/2 px-5 py-2.5 rounded-2xl shadow-xl text-white font-extrabold text-xs md:text-sm z-50 transition animate-bounce flex items-center gap-2 ${type === 'error' ? 'bg-rose-600' : 'bg-amber-600'}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
